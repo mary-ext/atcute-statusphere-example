@@ -50,8 +50,7 @@ a reimplementation of Bluesky's
 
    confidential OAuth clients requires a publicly accessible URL. for local development, you'll need
    to tunnel your local server using a service like [ngrok](https://ngrok.com/) or
-   [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do
-   wnloads/).
+   [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/).
 
    once running, set the tunnel URL as your public URL in `.env`:
 
