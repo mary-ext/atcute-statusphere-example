@@ -1,4 +1,5 @@
 import { Client } from '@atcute/client';
+import type { Did } from '@atcute/lexicons';
 import {
 	AuthMethodUnsatisfiableError,
 	TokenInvalidError,
@@ -8,8 +9,20 @@ import {
 
 import { getRequestEvent } from '$app/server';
 
-import { APP_SESSION_COOKIE, deleteAppSession } from '$lib/server/auth/app-session';
+import { getSignedCookie } from '$lib/server/auth/signed-cookie';
 import { oauth } from '$lib/server/oauth';
+import { error } from '@sveltejs/kit';
+
+export const SESSION_COOKIE = 'statusphere_session';
+
+export interface Session {
+	did: Did;
+}
+
+export interface AuthContext {
+	session: Session;
+	client: Client;
+}
 
 const isSessionInvalidError = (err: unknown): boolean => {
 	return (
@@ -20,25 +33,41 @@ const isSessionInvalidError = (err: unknown): boolean => {
 	);
 };
 
-export const getAuthedClient = async (): Promise<Client> => {
-	const {
-		locals: { session: sessionInfo },
-		cookies,
-	} = getRequestEvent();
+/**
+ * requires an authenticated session, throwing if not signed in or session is invalid.
+ * caches the result in locals for successive calls within the same request.
+ * @returns authenticated session and client
+ * @throws if not signed in or OAuth session is invalid
+ */
+export const requireAuth = async (): Promise<AuthContext> => {
+	const { locals, cookies } = getRequestEvent();
 
-	if (!sessionInfo) {
-		throw new Error(`not signed in`);
+	// return cached result if available
+	if (locals.auth) {
+		return locals.auth;
+	}
+
+	const did = getSignedCookie(cookies, SESSION_COOKIE) as Did | null;
+	if (!did) {
+		error(401, `not signed in`);
 	}
 
 	try {
-		const session = await oauth.restore(sessionInfo.did);
+		const session = await oauth.restore(did);
 		const client = new Client({ handler: session });
 
-		return client;
+		const auth: AuthContext = {
+			session: { did },
+			client,
+		};
+
+		locals.auth = auth;
+		return auth;
 	} catch (err) {
 		if (isSessionInvalidError(err)) {
-			await deleteAppSession(sessionInfo.id);
-			cookies.delete(APP_SESSION_COOKIE, { path: '/' });
+			cookies.delete(SESSION_COOKIE, { path: '/' });
+
+			error(401, `session expired`);
 		}
 
 		throw err;

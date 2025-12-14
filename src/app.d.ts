@@ -1,13 +1,13 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 
-import type { AppSession } from '$lib/server/auth/app-session';
+import type { AuthContext } from '$lib/server/auth';
 
 // for information about these interfaces
 declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			session?: AppSession | null;
+			auth?: AuthContext;
 		}
 		// interface PageData {}
 		// interface PageState {}

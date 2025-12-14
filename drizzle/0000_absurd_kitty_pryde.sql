@@ -1,11 +1,3 @@
-CREATE TABLE `app_session` (
-	`id` text PRIMARY KEY NOT NULL,
-	`did` text NOT NULL,
-	`created_at` integer NOT NULL,
-	`last_seen_at` integer NOT NULL
-);
---> statement-breakpoint
-CREATE INDEX `app_session_did_idx` ON `app_session` (`did`);--> statement-breakpoint
 CREATE TABLE `identity` (
 	`did` text PRIMARY KEY NOT NULL,
 	`handle` text NOT NULL,

@@ -20,17 +20,6 @@ export const oauthSession = sqliteTable(
 	(table) => [index('oauth_session_updated_at_idx').on(table.updatedAt)],
 );
 
-export const appSession = sqliteTable(
-	'app_session',
-	{
-		id: text('id').primaryKey(),
-		did: text('did').notNull(),
-		createdAt: integer('created_at').notNull(),
-		lastSeenAt: integer('last_seen_at').notNull(),
-	},
-	(table) => [index('app_session_did_idx').on(table.did)],
-);
-
 export const identity = sqliteTable('identity', {
 	did: text('did').primaryKey(),
 	handle: text('handle').notNull(),

@@ -6,7 +6,7 @@ import { isActorIdentifier, type ActorIdentifier } from '@atcute/lexicons/syntax
 
 import { form, getRequestEvent } from '$app/server';
 
-import { APP_SESSION_COOKIE, deleteAppSession } from './server/auth/app-session';
+import { SESSION_COOKIE } from './server/auth';
 import { oauth } from './server/oauth';
 
 const actorIdentifierString = v.custom<ActorIdentifier>(
@@ -41,15 +41,8 @@ export const doLogin = form(
 );
 
 export const doLogout = form(async () => {
-	const {
-		locals: { session },
-		cookies,
-	} = getRequestEvent();
+	const { cookies } = getRequestEvent();
 
-	if (session) {
-		await deleteAppSession(session.id);
-	}
-
-	cookies.delete(APP_SESSION_COOKIE, { path: '/' });
+	cookies.delete(SESSION_COOKIE, { path: '/' });
 	redirect(303, '/');
 });

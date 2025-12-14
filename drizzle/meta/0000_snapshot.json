@@ -1,55 +1,9 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "03f1c343-6be8-467e-a6c5-10bba6559e6a",
+  "id": "78dc97fb-2759-4aba-b927-e6b7d1d2ac73",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "app_session": {
-      "name": "app_session",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "did": {
-          "name": "did",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "last_seen_at": {
-          "name": "last_seen_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "app_session_did_idx": {
-          "name": "app_session_did_idx",
-          "columns": [
-            "did"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
     "identity": {
       "name": "identity",
       "columns": {

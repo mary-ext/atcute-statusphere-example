@@ -8,10 +8,10 @@ import type { CanonicalResourceUri, Did, Handle } from '@atcute/lexicons';
 import * as TID from '@atcute/tid';
 import { and, desc, eq, inArray, lt, or } from 'drizzle-orm';
 
-import { form, getRequestEvent, query } from '$app/server';
+import { form, query } from '$app/server';
 
 import type { XyzStatusphereStatus } from '$lib/lexicons';
-import { getAuthedClient } from '$lib/server/auth';
+import { requireAuth } from '$lib/server/auth';
 import { db, schema } from '$lib/server/db';
 import { statusOptions } from '$lib/status-options';
 
@@ -23,21 +23,21 @@ export interface CurrentUser {
 
 /** returns the current user's profile, or null if not signed in */
 export const getCurrentUser = query(async (): Promise<CurrentUser | null> => {
-	const {
-		locals: { session },
-	} = getRequestEvent();
-
-	if (!session) {
+	let did: Did;
+	try {
+		const auth = await requireAuth();
+		did = auth.session.did;
+	} catch {
 		return null;
 	}
 
 	const [identity, profile] = await Promise.all([
-		db.select().from(schema.identity).where(eq(schema.identity.did, session.did)).get(),
-		db.select().from(schema.profile).where(eq(schema.profile.did, session.did)).get(),
+		db.select().from(schema.identity).where(eq(schema.identity.did, did)).get(),
+		db.select().from(schema.profile).where(eq(schema.profile.did, did)).get(),
 	]);
 
 	return {
-		did: session.did,
+		did,
 		handle: (identity?.handle ?? 'handle.invalid') as Handle,
 		displayName: profile?.displayName ?? undefined,
 	};
@@ -75,19 +75,11 @@ export const postStatus = form(
 		status: v.pipe(v.string(), v.minLength(1), v.maxLength(32), v.maxGraphemes(1)),
 	}),
 	async ({ status }, issue) => {
-		const {
-			locals: { session },
-		} = getRequestEvent();
-
-		if (!session) {
-			invalid(`not signed in`);
-		}
+		const { session, client } = await requireAuth();
 
 		if (!statusOptions.includes(status)) {
 			invalid(issue.status(`invalid status`));
 		}
-
-		const client = await getAuthedClient();
 
 		const rkey = TID.now();
 		const createdAt = new Date().toISOString();

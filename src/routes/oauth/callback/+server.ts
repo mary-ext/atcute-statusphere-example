@@ -1,23 +1,15 @@
 import { redirect } from '@sveltejs/kit';
 
-import { APP_SESSION_COOKIE, createAppSession, deleteAppSession } from '$lib/server/auth/app-session';
-import { getSignedCookie, setSignedCookie } from '$lib/server/auth/signed-cookie';
+import { SESSION_COOKIE } from '$lib/server/auth';
+import { setSignedCookie } from '$lib/server/auth/signed-cookie';
 import { oauth } from '$lib/server/oauth';
 
 export const GET = async ({ url, cookies }) => {
-	{
-		const existingSessionId = getSignedCookie(cookies, APP_SESSION_COOKIE);
-		if (existingSessionId) {
-			await deleteAppSession(existingSessionId);
-		}
-	}
-
 	const { session } = await oauth.callback(url.searchParams);
 
-	const appSession = await createAppSession(session.did);
 	const secure = url.protocol === 'https:';
 
-	setSignedCookie(cookies, APP_SESSION_COOKIE, appSession.id, {
+	setSignedCookie(cookies, SESSION_COOKIE, session.did, {
 		httpOnly: true,
 		secure: secure,
 		sameSite: 'lax' as const,
