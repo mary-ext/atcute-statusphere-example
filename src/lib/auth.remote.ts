@@ -2,7 +2,9 @@ import { invalid, redirect } from '@sveltejs/kit';
 
 import * as v from 'valibot';
 
+import { ActorResolutionError } from '@atcute/identity-resolver';
 import { isActorIdentifier, type ActorIdentifier } from '@atcute/lexicons/syntax';
+import { OAuthResolverError } from '@atcute/oauth-node-client';
 
 import { form, getRequestEvent } from '$app/server';
 
@@ -31,6 +33,12 @@ export const doLogin = form(
 
 			url = result.url;
 		} catch (err) {
+			if (err instanceof OAuthResolverError) {
+				if (err.cause instanceof ActorResolutionError) {
+					invalid(`that identifier doesn't seem to be valid`);
+				}
+			}
+
 			console.error(`failed to authenticate ${identifier}:`, err);
 
 			invalid(`could not initiate login`);
