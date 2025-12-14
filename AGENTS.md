@@ -1,0 +1,41 @@
+atcute-statusphere-app is a repository reimplementing atproto's Statusphere demo with atcute and SvelteKit.
+
+## development notes
+
+### project management
+
+- tools like Node.js, Bun and pnpm are managed by mise, to run them, use `mise exec -- pnpm ...`
+
+### code writing
+
+- new files should be in kebab-case
+- use tabs for indentation, spaces allowed for diagrams in comments
+- use single quotes and add trailing commas
+- prefer arrow functions
+- use braces for control statements, even single-line bodies
+- use bare blocks `{ }` to group related code and limit variable scope
+- use template literals for user-facing strings and error messages
+
+### documentation
+
+- documentations include README, code comments, commit messages, changesets
+- any writing should be in lowercase, except for proper nouns, acronyms and 'I'
+- only comment non-trivial code, focusing on _why_ rather than _what_
+- write comments and JSDoc in lowercase (except proper nouns, acronyms, and 'I')
+- add JSDoc comments to newly exported functions, methods, classes, fields, and enums
+- JSDoc should include proper annotations:
+  - use `@param` for parameters (no dashes after param names)
+  - use `@returns` for return values
+  - use `@throws` for exceptions when applicable
+  - keep descriptions concise but informative
+
+### misc
+
+- Claude Code's Bash tool persists directory changes (`cd`) across calls
+- the `.research/` directory serves as a workspace for temporary experiments, analysis, and planning
+  materials. create it if necessary (it's gitignored). this directory may contain cloned
+  repositories or other reference materials that can help inform implementation decisions
+- don't make assumptions or speculate about code, plans, or requirements without exploring first;
+  pause and ask for clarification when you're still unsure after looking into it
+- during plan mode, discuss the plans before finalizing/exiting plan mode to allow for additional
+  context or follow-up questions to be provided
