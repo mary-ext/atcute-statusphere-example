@@ -27,7 +27,7 @@ export const oauth = new OAuthClient({
 		client_id: new URL('/oauth-client-metadata.json', publicUrl).href,
 		client_name: 'statusphere',
 		redirect_uris: [new URL('/oauth/callback', publicUrl).href],
-		scope: 'atproto transition:generic',
+		scope: 'atproto repo:xyz.statusphere.status',
 		jwks_uri: new URL('/jwks.json', publicUrl).href,
 	},
 
