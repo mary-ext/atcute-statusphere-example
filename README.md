@@ -28,6 +28,8 @@ a reimplementation of Bluesky's
 
    ```sh
    docker run -p 2480:2480 \
+     -v ./data:/data \
+     -e TAP_DATABASE_URL=sqlite:///data/tap.db \
      -e TAP_SIGNAL_COLLECTION=xyz.statusphere.status \
      -e TAP_COLLECTION_FILTERS=xyz.statusphere.status,app.bsky.actor.profile \
      ghcr.io/bluesky-social/indigo/tap:latest
