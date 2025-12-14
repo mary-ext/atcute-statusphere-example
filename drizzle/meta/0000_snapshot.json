@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "78dc97fb-2759-4aba-b927-e6b7d1d2ac73",
+  "id": "ca02a5fe-d4e6-42ad-a03e-3b5cd85f3302",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "identity": {
@@ -59,8 +59,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "session_json": {
-          "name": "session_json",
+        "session": {
+          "name": "session",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -98,8 +98,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "state_json": {
-          "name": "state_json",
+        "state": {
+          "name": "state",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -137,15 +137,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "display_name": {
-          "name": "display_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "record_json": {
-          "name": "record_json",
+        "record": {
+          "name": "record",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -189,16 +182,16 @@
           "notNull": true,
           "autoincrement": false
         },
-        "status": {
-          "name": "status",
+        "record": {
+          "name": "record",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "text",
+        "sort_at": {
+          "name": "sort_at",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -212,10 +205,10 @@
         }
       },
       "indexes": {
-        "status_indexed_at_idx": {
-          "name": "status_indexed_at_idx",
+        "status_sort_at_idx": {
+          "name": "status_sort_at_idx",
           "columns": [
-            "indexed_at"
+            "sort_at"
           ],
           "isUnique": false
         }

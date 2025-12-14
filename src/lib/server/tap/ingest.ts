@@ -7,8 +7,6 @@ import { XyzStatusphereStatus } from '$lib/lexicons';
 import { db } from '$lib/server/db';
 import { identity, profile, status } from '$lib/server/db/schema';
 
-const now = () => Date.now();
-
 const toAtUri = (did: string, collection: string, rkey: string): string => {
 	return `at://${did}/${collection}/${rkey}`;
 };
@@ -20,6 +18,8 @@ const toAtUri = (did: string, collection: string, rkey: string): string => {
  */
 export const ingestTapEvent = async (event: TapEvent): Promise<void> => {
 	if (event.type === 'identity') {
+		const updatedAt = Date.now();
+
 		await db
 			.insert(identity)
 			.values({
@@ -27,7 +27,7 @@ export const ingestTapEvent = async (event: TapEvent): Promise<void> => {
 				handle: event.handle,
 				isActive: event.isActive,
 				status: event.status,
-				updatedAt: now(),
+				updatedAt,
 			})
 			.onConflictDoUpdate({
 				target: identity.did,
@@ -35,7 +35,7 @@ export const ingestTapEvent = async (event: TapEvent): Promise<void> => {
 					handle: event.handle,
 					isActive: event.isActive,
 					status: event.status,
-					updatedAt: now(),
+					updatedAt,
 				},
 			})
 			.run();
@@ -53,32 +53,25 @@ export const ingestTapEvent = async (event: TapEvent): Promise<void> => {
 			return;
 		}
 
-		const record = event.record;
-		if (!record) {
-			return;
-		}
-
-		const parsed = safeParse(AppBskyActorProfile.mainSchema, record);
+		const parsed = safeParse(AppBskyActorProfile.mainSchema, event.record);
 		if (!parsed.ok) {
 			return;
 		}
 
-		const indexedAt = now();
-		const recordJson = JSON.stringify(parsed.value);
+		const record = parsed.value;
+		const indexedAt = Date.now();
 
 		await db
 			.insert(profile)
 			.values({
 				did: event.did,
-				displayName: parsed.value.displayName ?? null,
-				recordJson,
+				record,
 				indexedAt,
 			})
 			.onConflictDoUpdate({
 				target: profile.did,
 				set: {
-					displayName: parsed.value.displayName ?? null,
-					recordJson,
+					record,
 					indexedAt,
 				},
 			})
@@ -95,17 +88,14 @@ export const ingestTapEvent = async (event: TapEvent): Promise<void> => {
 			return;
 		}
 
-		const record = event.record;
-		if (!record) {
-			return;
-		}
-
-		const parsed = safeParse(XyzStatusphereStatus.mainSchema, record);
+		const parsed = safeParse(XyzStatusphereStatus.mainSchema, event.record);
 		if (!parsed.ok) {
 			return;
 		}
 
-		const indexedAt = now();
+		const record = parsed.value;
+		const indexedAt = Date.now();
+		const sortAt = Math.min(Date.parse(record.createdAt), indexedAt);
 
 		await db
 			.insert(status)
@@ -113,14 +103,14 @@ export const ingestTapEvent = async (event: TapEvent): Promise<void> => {
 				uri,
 				authorDid: event.did,
 				rkey: event.rkey,
-				status: parsed.value.status,
-				createdAt: parsed.value.createdAt,
+				record,
+				sortAt,
 				indexedAt,
 			})
 			.onConflictDoUpdate({
 				target: status.uri,
 				set: {
-					status: parsed.value.status,
+					record,
 					indexedAt,
 				},
 			})

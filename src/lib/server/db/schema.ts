@@ -1,10 +1,15 @@
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
+import type { AppBskyActorProfile } from '@atcute/bluesky';
+import type { StoredSession, StoredState } from '@atcute/oauth-node-client';
+
+import type { XyzStatusphereStatus } from '$lib/lexicons';
+
 export const oauthState = sqliteTable(
 	'oauth_state',
 	{
 		key: text('key').primaryKey(),
-		stateJson: text('state_json').notNull(),
+		state: text('state', { mode: 'json' }).$type<StoredState>().notNull(),
 		expiresAt: integer('expires_at').notNull(),
 	},
 	(table) => [index('oauth_state_expires_at_idx').on(table.expiresAt)],
@@ -14,7 +19,7 @@ export const oauthSession = sqliteTable(
 	'oauth_session',
 	{
 		did: text('did').primaryKey(),
-		sessionJson: text('session_json').notNull(),
+		session: text('session', { mode: 'json' }).$type<StoredSession>().notNull(),
 		updatedAt: integer('updated_at').notNull(),
 	},
 	(table) => [index('oauth_session_updated_at_idx').on(table.updatedAt)],
@@ -30,8 +35,7 @@ export const identity = sqliteTable('identity', {
 
 export const profile = sqliteTable('profile', {
 	did: text('did').primaryKey(),
-	displayName: text('display_name'),
-	recordJson: text('record_json').notNull(),
+	record: text('record', { mode: 'json' }).$type<AppBskyActorProfile.Main>().notNull(),
 	indexedAt: integer('indexed_at').notNull(),
 });
 
@@ -41,9 +45,9 @@ export const status = sqliteTable(
 		uri: text('uri').primaryKey(),
 		authorDid: text('author_did').notNull(),
 		rkey: text('rkey').notNull(),
-		status: text('status').notNull(),
-		createdAt: text('created_at').notNull(),
+		record: text('record', { mode: 'json' }).$type<XyzStatusphereStatus.Main>().notNull(),
+		sortAt: integer('sort_at').notNull(),
 		indexedAt: integer('indexed_at').notNull(),
 	},
-	(table) => [index('status_indexed_at_idx').on(table.indexedAt)],
+	(table) => [index('status_sort_at_idx').on(table.sortAt)],
 );

@@ -10,22 +10,17 @@ export const stores: OAuthClientStores = {
 	sessions: {
 		async get(did: Did) {
 			const row = await db.select().from(oauthSession).where(eq(oauthSession.did, did)).get();
-			if (!row) {
-				return;
-			}
-
-			return JSON.parse(row.sessionJson) as StoredSession;
+			return row?.session;
 		},
-		async set(did: Did, value: StoredSession) {
-			const sessionJson = JSON.stringify(value);
+		async set(did: Did, session: StoredSession) {
 			const updatedAt = Date.now();
 
 			await db
 				.insert(oauthSession)
-				.values({ did, sessionJson, updatedAt })
+				.values({ did, session, updatedAt })
 				.onConflictDoUpdate({
 					target: oauthSession.did,
-					set: { sessionJson, updatedAt },
+					set: { session, updatedAt },
 				})
 				.run();
 		},
@@ -49,18 +44,17 @@ export const stores: OAuthClientStores = {
 				return;
 			}
 
-			return JSON.parse(row.stateJson) as StoredState;
+			return row.state;
 		},
-		async set(key: string, value: StoredState) {
-			const stateJson = JSON.stringify(value);
-			const expiresAt = value.expiresAt;
+		async set(key: string, state: StoredState) {
+			const expiresAt = state.expiresAt;
 
 			await db
 				.insert(oauthState)
-				.values({ key, stateJson, expiresAt })
+				.values({ key, state, expiresAt })
 				.onConflictDoUpdate({
 					target: oauthState.key,
-					set: { stateJson, expiresAt },
+					set: { state, expiresAt },
 				})
 				.run();
 		},

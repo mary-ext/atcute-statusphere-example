@@ -39,12 +39,12 @@ export const getCurrentUser = query(async (): Promise<CurrentUser | null> => {
 	return {
 		did,
 		handle: (identity?.handle ?? 'handle.invalid') as Handle,
-		displayName: profile?.displayName ?? undefined,
+		displayName: profile?.record.displayName ?? undefined,
 	};
 });
 
-const encodeCursor = (indexedAt: number, uri: string): string => {
-	return `${indexedAt}:${uri}`;
+const encodeCursor = (sortAt: number, uri: string): string => {
+	return `${sortAt}:${uri}`;
 };
 
 const cursorSchema = v.pipe(
@@ -58,15 +58,15 @@ const cursorSchema = v.pipe(
 			return NEVER;
 		}
 
-		const indexedAt = parseInt(input.slice(0, idx), 10);
+		const sortAt = parseInt(input.slice(0, idx), 10);
 		const uri = input.slice(idx + 1);
 
-		if (Number.isNaN(indexedAt) || !uri) {
+		if (Number.isNaN(sortAt) || !uri) {
 			addIssue({ message: 'invalid cursor format' });
 			return NEVER;
 		}
 
-		return { indexedAt, uri };
+		return { sortAt, uri };
 	}),
 );
 
@@ -110,15 +110,18 @@ export const postStatus = form(
 		// insert locally so we don't have to wait for ingester
 		{
 			const uri: CanonicalResourceUri = `at://${session.did}/xyz.statusphere.status/${rkey}`;
+			const indexedAt = Date.now();
+			const sortAt = Math.min(Date.parse(createdAt), indexedAt);
+
 			await db
 				.insert(schema.status)
 				.values({
 					uri,
 					authorDid: session.did,
 					rkey,
-					status,
-					createdAt,
-					indexedAt: Date.now(),
+					record,
+					sortAt,
+					indexedAt,
 				})
 				.onConflictDoNothing()
 				.run();
@@ -135,7 +138,7 @@ export interface AuthorView {
 
 export interface StatusView {
 	author: AuthorView;
-	status: string;
+	record: XyzStatusphereStatus.Main;
 	indexedAt: string;
 }
 
@@ -157,12 +160,12 @@ export const getTimeline = query(
 			.where(
 				cursor
 					? or(
-							lt(schema.status.indexedAt, cursor.indexedAt),
-							and(eq(schema.status.indexedAt, cursor.indexedAt), lt(schema.status.uri, cursor.uri)),
+							lt(schema.status.sortAt, cursor.sortAt),
+							and(eq(schema.status.sortAt, cursor.sortAt), lt(schema.status.uri, cursor.uri)),
 						)
 					: undefined,
 			)
-			.orderBy(desc(schema.status.indexedAt), desc(schema.status.uri))
+			.orderBy(desc(schema.status.sortAt), desc(schema.status.uri))
 			.limit(limit + 1)
 			.all();
 
@@ -182,23 +185,22 @@ export const getTimeline = query(
 		const statuses = items.map((s): StatusView => {
 			const identity = identityMap.get(s.authorDid);
 			const profile = profileMap.get(s.authorDid);
-			const indexedAt = Math.min(Date.parse(s.createdAt), s.indexedAt);
 
 			return {
 				author: {
 					did: s.authorDid as Did,
 					handle: (identity?.handle ?? 'handle.invalid') as Handle,
-					displayName: profile?.displayName ?? undefined,
+					displayName: profile?.record.displayName ?? undefined,
 				},
-				status: s.status,
-				indexedAt: new Date(indexedAt).toISOString(),
+				record: s.record,
+				indexedAt: new Date(s.sortAt).toISOString(),
 			};
 		});
 
 		const last = items[items.length - 1];
 
 		return {
-			cursor: hasMore && last ? encodeCursor(last.indexedAt, last.uri) : undefined,
+			cursor: hasMore && last ? encodeCursor(last.sortAt, last.uri) : undefined,
 			statuses,
 		};
 	},

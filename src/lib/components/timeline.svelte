@@ -52,7 +52,7 @@
 	<div class="timeline">
 		{#each statuses as item}
 			<div class="item">
-				<div class="emoji">{item.status}</div>
+				<div class="emoji">{item.record.status}</div>
 				<div class="content">
 					<a
 						href={getBskyProfileUrl(item.author.handle)}

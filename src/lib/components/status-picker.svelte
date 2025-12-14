@@ -26,7 +26,11 @@
 									handle: user.handle,
 									displayName: user.displayName,
 								},
-								status: data.status,
+								record: {
+									$type: 'xyz.statusphere.status',
+									status: data.status,
+									createdAt: new Date().toISOString(),
+								},
 								indexedAt: new Date().toISOString(),
 							},
 							...current.statuses,
