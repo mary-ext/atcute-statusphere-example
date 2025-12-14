@@ -1,40 +1,65 @@
-# sv
+# statusphere
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+a reimplementation of Bluesky's
+[Statusphere example app](https://github.com/bluesky-social/statusphere-example-app), using
+[atcute](https://github.com/mary-ext/atcute) and [SvelteKit](https://svelte.dev).
 
-## Creating a project
+![screenshot of the web interface](screenshot.png)
 
-If you're seeing this, you've probably already done this step. Congrats!
+## setup
 
-```sh
-# create a new project in the current directory
-npx sv create
+1. install dependencies:
 
-# create a new project in my-app
-npx sv create my-app
-```
+   ```sh
+   pnpm install
+   ```
 
-## Developing
+2. set up the environment variables:
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or
-`yarn`), start a development server:
+   ```sh
+   pnpm env:setup
+   ```
 
-```sh
-npm run dev
+   this copies the `.env.example` file to `.env` with the following values filled in:
+   - `COOKIE_SECRET` - random secret for signing cookies
+   - `OAUTH_PRIVATE_KEY_JWK` - ES256 keypair for OAuth
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+3. start a [Tap](https://github.com/bluesky-social/indigo/tree/main/cmd/tap) instance:
 
-## Building
+   ```sh
+   docker run -p 2480:2480 \
+     -e TAP_SIGNAL_COLLECTION=xyz.statusphere.status \
+     -e TAP_COLLECTION_FILTERS=xyz.statusphere.status,app.bsky.actor.profile \
+     ghcr.io/bluesky-social/indigo/tap:latest
+   ```
 
-To create a production version of your app:
+   Tap handles subscribing to the atproto firehose, backfilling repos, and filtering events. we set
+   it up such that it'd backfill all repos that have posted a status, and only emits events for
+   status and profile records.
 
-```sh
-npm run build
-```
+   then configure the Tap connection:
 
-You can preview the production build with `npm run preview`.
+   ```sh
+   TAP_URL=http://localhost:2480
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for
-> your target environment.
+   # if configured with a password
+   TAP_ADMIN_PASSWORD=
+   ```
+
+4. configure the public-facing URL:
+
+   ```sh
+   OAUTH_PUBLIC_URL=https://insulation-famous-bluetooth-secret.trycloudflare.com
+   ```
+
+5. migrate the database:
+
+   ```sh
+   pnpm db:migrate
+   ```
+
+6. run it!
+
+   ```sh
+   pnpm dev
+   ```

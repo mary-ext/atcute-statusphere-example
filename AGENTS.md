@@ -1,4 +1,5 @@
-atcute-statusphere-app is a repository reimplementing atproto's Statusphere demo with atcute and SvelteKit.
+atcute-statusphere-app is a repository reimplementing atproto's Statusphere demo with atcute and
+SvelteKit (with Svelte 5).
 
 ## development notes
 

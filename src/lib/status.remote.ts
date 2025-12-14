@@ -1,0 +1,213 @@
+import { invalid } from '@sveltejs/kit';
+
+import * as v from 'valibot';
+
+import { ComAtprotoRepoCreateRecord } from '@atcute/atproto';
+import { ok } from '@atcute/client';
+import type { CanonicalResourceUri, Did, Handle } from '@atcute/lexicons';
+import * as TID from '@atcute/tid';
+import { and, desc, eq, inArray, lt, or } from 'drizzle-orm';
+
+import { form, getRequestEvent, query } from '$app/server';
+
+import type { XyzStatusphereStatus } from '$lib/lexicons';
+import { getAuthedClient } from '$lib/server/auth';
+import { db, schema } from '$lib/server/db';
+import { statusOptions } from '$lib/status-options';
+
+export interface CurrentUser {
+	did: Did;
+	handle: Handle;
+	displayName?: string;
+}
+
+/** returns the current user's profile, or null if not signed in */
+export const getCurrentUser = query(async (): Promise<CurrentUser | null> => {
+	const {
+		locals: { session },
+	} = getRequestEvent();
+
+	if (!session) {
+		return null;
+	}
+
+	const [identity, profile] = await Promise.all([
+		db.select().from(schema.identity).where(eq(schema.identity.did, session.did)).get(),
+		db.select().from(schema.profile).where(eq(schema.profile.did, session.did)).get(),
+	]);
+
+	return {
+		did: session.did,
+		handle: (identity?.handle ?? 'handle.invalid') as Handle,
+		displayName: profile?.displayName ?? undefined,
+	};
+});
+
+const encodeCursor = (indexedAt: number, uri: string): string => {
+	return `${indexedAt}:${uri}`;
+};
+
+const cursorSchema = v.pipe(
+	v.string(),
+	v.rawTransform(({ dataset, addIssue, NEVER }) => {
+		const input = dataset.value;
+
+		const idx = input.indexOf(':');
+		if (idx === -1) {
+			addIssue({ message: 'invalid cursor format' });
+			return NEVER;
+		}
+
+		const indexedAt = parseInt(input.slice(0, idx), 10);
+		const uri = input.slice(idx + 1);
+
+		if (Number.isNaN(indexedAt) || !uri) {
+			addIssue({ message: 'invalid cursor format' });
+			return NEVER;
+		}
+
+		return { indexedAt, uri };
+	}),
+);
+
+export const postStatus = form(
+	v.object({
+		status: v.pipe(v.string(), v.minLength(1), v.maxLength(32), v.maxGraphemes(1)),
+	}),
+	async ({ status }, issue) => {
+		const {
+			locals: { session },
+		} = getRequestEvent();
+
+		if (!session) {
+			invalid(`not signed in`);
+		}
+
+		if (!statusOptions.includes(status)) {
+			invalid(issue.status(`invalid status`));
+		}
+
+		const client = await getAuthedClient();
+
+		const rkey = TID.now();
+		const createdAt = new Date().toISOString();
+
+		const record: XyzStatusphereStatus.Main = {
+			$type: 'xyz.statusphere.status',
+			createdAt: createdAt,
+			status: status,
+		};
+
+		try {
+			await ok(
+				client.call(ComAtprotoRepoCreateRecord, {
+					input: {
+						repo: session.did,
+						collection: 'xyz.statusphere.status',
+						rkey: rkey,
+						record,
+					},
+				}),
+			);
+		} catch (err) {
+			console.error(`failed to post status:`, err);
+
+			invalid(`could not post status - please try again`);
+		}
+
+		// insert locally so we don't have to wait for ingester
+		{
+			const uri: CanonicalResourceUri = `at://${session.did}/xyz.statusphere.status/${rkey}`;
+			await db
+				.insert(schema.status)
+				.values({
+					uri,
+					authorDid: session.did,
+					rkey,
+					status,
+					createdAt,
+					indexedAt: Date.now(),
+				})
+				.onConflictDoNothing()
+				.run();
+		}
+	},
+);
+
+export interface AuthorView {
+	did: Did;
+	handle: Handle;
+	displayName?: string;
+	avatar?: string;
+}
+
+export interface StatusView {
+	author: AuthorView;
+	status: string;
+	indexedAt: string;
+}
+
+export interface TimelineResponse {
+	cursor: string | undefined;
+	statuses: StatusView[];
+}
+
+export const getTimeline = query(
+	v.object({
+		cursor: v.optional(cursorSchema),
+	}),
+	async ({ cursor }): Promise<TimelineResponse> => {
+		const limit = 20;
+
+		const statusRows = await db
+			.select()
+			.from(schema.status)
+			.where(
+				cursor
+					? or(
+							lt(schema.status.indexedAt, cursor.indexedAt),
+							and(eq(schema.status.indexedAt, cursor.indexedAt), lt(schema.status.uri, cursor.uri)),
+						)
+					: undefined,
+			)
+			.orderBy(desc(schema.status.indexedAt), desc(schema.status.uri))
+			.limit(limit + 1)
+			.all();
+
+		const hasMore = statusRows.length > limit;
+		const items = hasMore ? statusRows.slice(0, limit) : statusRows;
+
+		const dids = [...new Set(items.map((s) => s.authorDid))];
+
+		const [identities, profiles] = await Promise.all([
+			db.select().from(schema.identity).where(inArray(schema.identity.did, dids)).all(),
+			db.select().from(schema.profile).where(inArray(schema.profile.did, dids)).all(),
+		]);
+
+		const identityMap = new Map(identities.map((i) => [i.did, i]));
+		const profileMap = new Map(profiles.map((p) => [p.did, p]));
+
+		const statuses = items.map((s): StatusView => {
+			const identity = identityMap.get(s.authorDid);
+			const profile = profileMap.get(s.authorDid);
+			const indexedAt = Math.min(Date.parse(s.createdAt), s.indexedAt);
+
+			return {
+				author: {
+					did: s.authorDid as Did,
+					handle: (identity?.handle ?? 'handle.invalid') as Handle,
+					displayName: profile?.displayName ?? undefined,
+				},
+				status: s.status,
+				indexedAt: new Date(indexedAt).toISOString(),
+			};
+		});
+
+		const last = items[items.length - 1];
+
+		return {
+			cursor: hasMore && last ? encodeCursor(last.indexedAt, last.uri) : undefined,
+			statuses,
+		};
+	},
+);
