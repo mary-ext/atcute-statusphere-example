@@ -2,6 +2,7 @@ import { error } from '@sveltejs/kit';
 
 import { Client } from '@atcute/client';
 import type { Did } from '@atcute/lexicons';
+import { isDid } from '@atcute/lexicons/syntax';
 import {
 	AuthMethodUnsatisfiableError,
 	TokenInvalidError,
@@ -48,8 +49,13 @@ export const requireAuth = async (): Promise<AuthContext> => {
 		return locals.auth;
 	}
 
-	const did = getSignedCookie(cookies, SESSION_COOKIE) as Did | null;
+	const did = getSignedCookie(cookies, SESSION_COOKIE);
 	if (!did) {
+		error(401, `not signed in`);
+	}
+
+	if (!isDid(did)) {
+		cookies.delete(SESSION_COOKIE, { path: '/' });
 		error(401, `not signed in`);
 	}
 
