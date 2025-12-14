@@ -1,3 +1,5 @@
+import { error } from '@sveltejs/kit';
+
 import { Client } from '@atcute/client';
 import type { Did } from '@atcute/lexicons';
 import {
@@ -11,7 +13,6 @@ import { getRequestEvent } from '$app/server';
 
 import { getSignedCookie } from '$lib/server/auth/signed-cookie';
 import { oauth } from '$lib/server/oauth';
-import { error } from '@sveltejs/kit';
 
 export const SESSION_COOKIE = 'statusphere_session';
 
