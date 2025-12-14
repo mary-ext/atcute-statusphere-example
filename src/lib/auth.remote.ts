@@ -3,7 +3,6 @@ import { invalid, redirect } from '@sveltejs/kit';
 import * as v from 'valibot';
 
 import { isActorIdentifier, type ActorIdentifier } from '@atcute/lexicons/syntax';
-import { OAuthResolverError } from '@atcute/oauth-node-client';
 
 import { form, getRequestEvent } from '$app/server';
 
