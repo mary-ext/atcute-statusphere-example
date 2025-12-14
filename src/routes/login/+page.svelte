@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { doLogin } from '$lib/auth.remote';
 
-	const identifierIssues = $derived(doLogin.fields.identifier.issues() ?? []);
-	const allIssues = $derived(doLogin.fields.issues() ?? []);
-	const formIssue = $derived(allIssues.find((i) => i.path === undefined));
+	const formId = $props.id();
+
+	const formIssue = $derived(doLogin.fields.issues()?.at(0));
+	const identifierIssue = $derived(doLogin.fields.identifier.issues()?.at(0));
 </script>
 
 <div class="page">
@@ -15,14 +16,14 @@
 			<label for="identifier" class="label">handle</label>
 			<input
 				{...doLogin.fields.identifier.as('text')}
-				id="identifier"
 				class="input"
 				placeholder="alice.bsky.social"
 				required
-				aria-invalid={identifierIssues.length > 0 ? 'true' : undefined}
+				aria-describedby={`${formId}-identifier-validation-message`}
 			/>
-			{#if identifierIssues.length > 0}
-				<p class="error">{identifierIssues[0].message}</p>
+
+			{#if identifierIssue}
+				<p id={`${formId}-identifier-validation-message`} class="error">{identifierIssue.message}</p>
 			{/if}
 		</div>
 
