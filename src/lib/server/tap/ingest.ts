@@ -94,8 +94,10 @@ export const ingestTapEvent = async (event: TapEvent): Promise<void> => {
 		}
 
 		const record = parsed.value;
+
+		const createdAt = Date.parse(record.createdAt);
 		const indexedAt = Date.now();
-		const sortAt = Math.min(Date.parse(record.createdAt), indexedAt);
+		const sortAt = Number.isNaN(createdAt) ? indexedAt : Math.min(createdAt, indexedAt);
 
 		await db
 			.insert(status)
