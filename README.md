@@ -46,10 +46,17 @@ a reimplementation of Bluesky's
    TAP_ADMIN_PASSWORD=
    ```
 
-4. configure the public-facing URL:
+4. set up a tunnel:
+
+   confidential OAuth clients requires a publicly accessible URL. for local development, you'll need
+   to tunnel your local server using a service like [ngrok](https://ngrok.com/) or
+   [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do
+   wnloads/).
+
+   once running, set the tunnel URL as your public URL in `.env`:
 
    ```sh
-   OAUTH_PUBLIC_URL=https://insulation-famous-bluetooth-secret.trycloudflare.com
+   OAUTH_PUBLIC_URL=https://your-tunnel-url.example.com
    ```
 
 5. migrate the database:
