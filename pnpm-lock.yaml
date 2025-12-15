@@ -33,11 +33,11 @@ importers:
         specifier: ^1.1.6
         version: 1.1.6
       '@atcute/oauth-node-client':
+        specifier: ^0.1.2
+        version: 0.1.2
+      '@atcute/tap':
         specifier: ^0.1.1
         version: 0.1.1
-      '@atcute/tap':
-        specifier: ^0.1.0
-        version: 0.1.0
       '@atcute/tid':
         specifier: ^1.0.3
         version: 1.0.3
@@ -64,19 +64,19 @@ importers:
         specifier: ^5.4.0
         version: 5.4.0(@sveltejs/kit@2.49.2(@sveltejs/vite-plugin-svelte@6.2.1(svelte@5.46.0)(vite@7.2.7(@types/node@24.10.4)))(svelte@5.46.0)(vite@7.2.7(@types/node@24.10.4)))
       '@sveltejs/kit':
-        specifier: ^2.49.1
+        specifier: ^2.49.2
         version: 2.49.2(@sveltejs/vite-plugin-svelte@6.2.1(svelte@5.46.0)(vite@7.2.7(@types/node@24.10.4)))(svelte@5.46.0)(vite@7.2.7(@types/node@24.10.4))
       '@sveltejs/vite-plugin-svelte':
         specifier: ^6.2.1
         version: 6.2.1(svelte@5.46.0)(vite@7.2.7(@types/node@24.10.4))
       '@types/node':
-        specifier: ^24
+        specifier: ^24.10.4
         version: 24.10.4
       drizzle-kit:
         specifier: ^0.31.8
         version: 0.31.8
       drizzle-orm:
-        specifier: ^0.45.0
+        specifier: ^0.45.1
         version: 0.45.1(@libsql/client@0.15.15)
       prettier:
         specifier: ^3.7.4
@@ -85,10 +85,10 @@ importers:
         specifier: ^2.1.2
         version: 2.1.2(postcss@8.5.6)(prettier@3.7.4)
       prettier-plugin-svelte:
-        specifier: ^3.4.0
-        version: 3.4.0(prettier@3.7.4)(svelte@5.46.0)
+        specifier: ^3.4.1
+        version: 3.4.1(prettier@3.7.4)(svelte@5.46.0)
       svelte:
-        specifier: ^5.45.6
+        specifier: ^5.46.0
         version: 5.46.0
       svelte-check:
         specifier: ^4.3.4
@@ -97,7 +97,7 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
       vite:
-        specifier: ^7.2.6
+        specifier: ^7.2.7
         version: 7.2.7(@types/node@24.10.4)
 
 packages:
@@ -159,14 +159,14 @@ packages:
   '@atcute/multibase@1.1.6':
     resolution: {integrity: sha512-HBxuCgYLKPPxETV0Rot4VP9e24vKl8JdzGCZOVsDaOXJgbRZoRIF67Lp0H/OgnJeH/Xpva8Z5ReoTNJE5dn3kg==}
 
-  '@atcute/oauth-node-client@0.1.1':
-    resolution: {integrity: sha512-DmyG9vkaUY6rfzfLFDtsMCldU86O6gGLE/W6FVWCMUBWuDf7E6Qv03q5y43nuCkdkpr3uf4l1g2LSYHbVn5xLg==}
+  '@atcute/oauth-node-client@0.1.2':
+    resolution: {integrity: sha512-Vu+fTIdKVA5cus4jqpuN82WJPEenGRhKFVu0ddHIx3QAlHdiwIxdKu2WhxkH2N8okI3195SfE3RpydIwC7MG9A==}
 
   '@atcute/repo@0.1.0':
     resolution: {integrity: sha512-INiYAuma8dydBu7cqd2WVpcXh3mzhIepYBUqFWAK5MqMulPRLTRCc/9GW3G9pxYrOdlvLCVamG2Jf8XK0nuFEw==}
 
-  '@atcute/tap@0.1.0':
-    resolution: {integrity: sha512-mVZUMZG4Rxl+FoUrsI5cdV7sWyYyd/ny3nMiy3sR0ZSP6oJdBciLS+bcHNfvCito6xyFjpW4eG5J+HWQn0AUnQ==}
+  '@atcute/tap@0.1.1':
+    resolution: {integrity: sha512-cK2Zyt7+JHKTS5pbIw64pAJUKaNhRCJvlXw/dl1gMvpK/SAeBUE3BZLeJgiL7wadouFVysuOVnzr4os6bMdZMw==}
 
   '@atcute/tid@1.0.3':
     resolution: {integrity: sha512-wfMJx1IMdnu0CZgWl0uR4JO2s6PGT1YPhpytD4ZHzEYKKQVuqV6Eb/7vieaVo1eYNMp2FrY67FZObeR7utRl2w==}
@@ -1100,8 +1100,8 @@ packages:
     peerDependencies:
       prettier: 3.x
 
-  prettier-plugin-svelte@3.4.0:
-    resolution: {integrity: sha512-pn1ra/0mPObzqoIQn/vUTR3ZZI6UuZ0sHqMK5x2jMLGrs53h0sXhkVuDcrlssHwIMk7FYrMjHBPoUSyyEEDlBQ==}
+  prettier-plugin-svelte@3.4.1:
+    resolution: {integrity: sha512-xL49LCloMoZRvSwa6IEdN2GV6cq2IqpYGstYtMT+5wmml1/dClEoI0MZR78MiVPpu6BdQFfN0/y73yO6+br5Pg==}
     peerDependencies:
       prettier: ^3.0.0
       svelte: ^3.2.0 || ^4.0.0-next.0 || ^5.0.0-next.0
@@ -1371,7 +1371,7 @@ snapshots:
     dependencies:
       '@atcute/uint8array': 1.0.6
 
-  '@atcute/oauth-node-client@0.1.1':
+  '@atcute/oauth-node-client@0.1.2':
     dependencies:
       '@atcute/client': 4.1.1
       '@atcute/identity': 1.1.3
@@ -1394,7 +1394,7 @@ snapshots:
       '@atcute/mst': 0.1.0
       '@atcute/uint8array': 1.0.6
 
-  '@atcute/tap@0.1.0':
+  '@atcute/tap@0.1.1':
     dependencies:
       '@atcute/identity': 1.1.3
       '@atcute/lexicons': 1.2.5
@@ -2079,7 +2079,7 @@ snapshots:
     transitivePeerDependencies:
       - postcss
 
-  prettier-plugin-svelte@3.4.0(prettier@3.7.4)(svelte@5.46.0):
+  prettier-plugin-svelte@3.4.1(prettier@3.7.4)(svelte@5.46.0):
     dependencies:
       prettier: 3.7.4
       svelte: 5.46.0
