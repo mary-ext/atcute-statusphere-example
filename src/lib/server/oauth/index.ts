@@ -8,7 +8,7 @@ import {
 	WellKnownHandleResolver,
 } from '@atcute/identity-resolver';
 import { NodeDnsHandleResolver } from '@atcute/identity-resolver-node';
-import { OAuthClient, importJwkKey } from '@atcute/oauth-node-client';
+import { OAuthClient } from '@atcute/oauth-node-client';
 
 import { stores } from './stores';
 
@@ -31,7 +31,7 @@ export const oauth = new OAuthClient({
 		jwks_uri: new URL('/jwks.json', publicUrl).href,
 	},
 
-	keyset: await Promise.all([importJwkKey(env.OAUTH_PRIVATE_KEY_JWK)]),
+	keyset: [JSON.parse(env.OAUTH_PRIVATE_KEY_JWK)],
 
 	actorResolver: new LocalActorResolver({
 		handleResolver: new CompositeHandleResolver({

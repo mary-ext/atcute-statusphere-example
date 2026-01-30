@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { copyFile, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-import { exportJwkKey, generatePrivateKey, importJwkKey } from '@atcute/oauth-node-client';
+import { generateClientAssertionKey } from '@atcute/oauth-node-client';
 
 import { nanoid } from 'nanoid';
 
@@ -64,12 +64,7 @@ let updated = env;
 }
 
 {
-	const privateKey = await generatePrivateKey('main', 'ES256');
-	const jwk = await exportJwkKey(privateKey);
-
-	// sanity-check that the key parses before writing
-	await importJwkKey(jwk);
-
+	const jwk = await generateClientAssertionKey('main', 'ES256');
 	updated = upsertEnvVar(updated, 'OAUTH_PRIVATE_KEY_JWK', `'${JSON.stringify(jwk)}'`);
 }
 
