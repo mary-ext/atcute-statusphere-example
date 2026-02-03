@@ -7,8 +7,8 @@
 
 	let { statuses }: Props = $props();
 
-	const getBskyProfileUrl = (handle: string): string => {
-		return `https://bsky.app/profile/${handle}`;
+	const getBskyProfileUrl = (did: string): string => {
+		return `https://bsky.app/profile/${did}`;
 	};
 
 	const formatTime = (isoString: string): string => {
@@ -55,7 +55,7 @@
 				<div class="emoji">{item.record.status}</div>
 				<div class="content">
 					<a
-						href={getBskyProfileUrl(item.author.handle)}
+						href={getBskyProfileUrl(item.author.did)}
 						target="_blank"
 						rel="noopener noreferrer"
 						class="author"
